@@ -43,7 +43,7 @@ end ReactionTimer;
 architecture Behavioral of ReactionTimer is
 -- variables
 signal count, millis, hundreths, tenths, seconds, tens, random : integer := 0;
-signal mclk, btnstate : STD_LOGIC := '0';
+signal mclk, btnpressed : STD_LOGIC := '0';
 -- procedures
 procedure ssd_decode(
 		signal decimal : in integer;
@@ -87,30 +87,28 @@ end process;
 process (CLK, BTN, SWT)
 begin
 	if rising_edge(CLK) then
-		if BTN = '1' then
-			btnstate <= '1';
-		end if;
-		if SWT = '0' and BTN = '0' then
-			btnstate <= '0';
+		if BTN = '1' and SWT = '1' then
+			btnpressed <= '1';
+		elsif BTN = '0' and SWT = '0' then
+			btnpressed <= '0';
 		end if;
 	end if;
 end process;
 
 -- millisecond counter
-process (mclk, btnstate, SWT)
+process (mclk, btnpressed, SWT)
 begin
-	if (rising_edge(mclk)) then
+	if (rising_edge(mclk) and btnpressed = '0') then
 		if (random < 3000) and SWT = '1' then
 			random <= random + 1;
-		else 
-			random <= 0;
-		end if;
-		if SWT <= '0' then
+		elsif SWT <= '0' then
 			millis <= 0;
 			hundreths <= 0;
 			tenths <= 0;
 			seconds <= 0;
 			tens <= 0;
+			random <= 0;
+			LED <= "0000";
 		elsif millis = 9 then
 			millis <= 0;
 			hundreths <= hundreths + 1;
@@ -130,6 +128,7 @@ begin
 				end if;
 			end if;
 		else
+			LED <= "1111";
 			millis <= millis + 1;
 		end if;
 	end if;
@@ -156,11 +155,7 @@ begin
 	end if;
 end process;
 
--- 4 bit tens display
-process(tens)
-begin
-	LED <= conv_std_logic_vector(tens, 4);
-end process;
+
 
 end Behavioral;
 

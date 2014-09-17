@@ -96,7 +96,7 @@ BEGIN
 
       -- insert stimulus here 
 		SWT <= '1';
-		wait for 10 ms;
+		wait for 100 ms;
 		BTN <= '1';
       wait;
    end process;
