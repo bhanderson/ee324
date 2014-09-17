@@ -2,9 +2,9 @@
 -- Company: 
 -- Engineer: 
 -- 
--- Create Date:    18:53:47 09/10/2014 
+-- Create Date:    21:51:18 09/16/2014 
 -- Design Name: 
--- Module Name:    Stopwatch - Behavioral 
+-- Module Name:    ReactionTimer - Behavioral 
 -- Project Name: 
 -- Target Devices: 
 -- Tool versions: 
@@ -21,6 +21,7 @@ library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use ieee.std_logic_arith.all;
 
+
 -- Uncomment the following library declaration if using
 -- arithmetic functions with Signed or Unsigned values
 --use IEEE.NUMERIC_STD.ALL;
@@ -30,22 +31,19 @@ use ieee.std_logic_arith.all;
 --library UNISIM;
 --use UNISIM.VComponents.all;
 
-entity Stopwatch is
+entity ReactionTimer is
     Port ( CLK : in  STD_LOGIC;
-           BTN : in  STD_LOGIC_VECTOR (3 downto 0);
-           LED : out  STD_LOGIC_VECTOR (3 downto 0);
+		   SWT : in  STD_LOGIC;
+           BTN : in  STD_LOGIC;
+           SSEG : out  STD_LOGIC_VECTOR (7 downto 0);
            AN : out  STD_LOGIC_VECTOR (3 downto 0);
-           SSEG : out  STD_LOGIC_VECTOR (7 downto 0));
-end Stopwatch;
+           LED : out  STD_LOGIC_VECTOR (3 downto 0));
+end ReactionTimer;
 
-architecture Behavioral of Stopwatch is
-
+architecture Behavioral of ReactionTimer is
 -- variables
-signal count, seconds, tens, tenths, hundreths, millis, incstate : integer := 0;
-signal runstate : boolean := false;
-signal run_cs, run_ns: boolean;
-signal mclk, start, stop, reset, inc : STD_LOGIC := '0';
-
+signal count, millis, hundreths, tenths, seconds, tens, random : integer := 0;
+signal mclk, btnstate : STD_LOGIC := '0';
 -- procedures
 procedure ssd_decode(
 		signal decimal : in integer;
@@ -86,17 +84,34 @@ begin
 	end if;
 end process;
 
--- millisecond counter
-process (mclk, runstate, reset, inc)
+process (CLK, BTN, SWT)
 begin
-	if (reset = '1')then
-		millis <= 0;
-		hundreths <= 0;
-		tenths <= 0;
-		seconds <= 0;
-		tens <= 0;
-	elsif (rising_edge(mclk) and runstate = true) then
-		if millis = 9 then
+	if rising_edge(CLK) then
+		if BTN = '1' then
+			btnstate <= '1';
+		end if;
+		if SWT = '0' and BTN = '0' then
+			btnstate <= '0';
+		end if;
+	end if;
+end process;
+
+-- millisecond counter
+process (mclk, btnstate, SWT)
+begin
+	if (rising_edge(mclk)) then
+		if (random < 3000) and SWT = '1' then
+			random <= random + 1;
+		else 
+			random <= 0;
+		end if;
+		if SWT <= '0' then
+			millis <= 0;
+			hundreths <= 0;
+			tenths <= 0;
+			seconds <= 0;
+			tens <= 0;
+		elsif millis = 9 then
 			millis <= 0;
 			hundreths <= hundreths + 1;
 			if hundreths = 9 then
@@ -114,15 +129,11 @@ begin
 					end if;
 				end if;
 			end if;
-		else	
+		else
 			millis <= millis + 1;
 		end if;
-	elsif (inc = '1') then
-		millis <= millis + 1;
 	end if;
 end process;
-
-
 
 -- display sseg
 process (count, tens, seconds, tenths, hundreths, millis)
@@ -150,25 +161,6 @@ process(tens)
 begin
 	LED <= conv_std_logic_vector(tens, 4);
 end process;
-
-
-process (mclk, start, stop, runstate, inc, incstate) begin
-	if rising_edge(mclk) then
-		if start = '1' and stop = '0'  then
-			runstate <= true;
-		elsif stop = '1' and start = '0' then
-			runstate <= false;
-		else
-			runstate <= runstate;
-		end if;
-	end if;
-end process;
-
-
-start <= BTN(0);
-stop <= BTN(1);
-reset <= BTN(2);
-inc <= BTN(3);
 
 end Behavioral;
 
