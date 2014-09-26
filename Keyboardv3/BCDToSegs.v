@@ -82,6 +82,7 @@ module BCDToSegs(ones, tens, hundreds, segments);
 				segments[23:16] <= 8'b11111001;
 			2:
 				segments[23:16] <= 8'b10100100;
+/*
 			3:
 				segments[23:16] <= 8'b10110000;
 			4:
@@ -96,6 +97,7 @@ module BCDToSegs(ones, tens, hundreds, segments);
 				segments[23:16] <= 8'b10000000;
 			9:
 				segments[23:16] <= 8'b10010000;
+*/
 			default:
 				segments[23:16] <= 8'b00000000;
 		endcase
