@@ -1,0 +1,10 @@
+NET "led_kc" LOC = "U16";
+NET "led_kd" LOC = "V16";
+NET "led_mc" LOC = "U15";
+NET "led_md" LOC = "V15";
+#keyboard
+NET "ps2_kc" LOC = "L12" | PULLUP = "TRUE";
+NET "ps2_kd" LOC = "J13" | PULLUP = "TRUE";
+#mouse
+NET "ps2_mc" LOC = "L13";
+NET "ps2_md" LOC = "K14";
