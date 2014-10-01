@@ -18,8 +18,9 @@
 // Additional Comments: 
 //
 //////////////////////////////////////////////////////////////////////////////////
-module SegToSSD(clk, segments, an, seg);
+module SegToSSD(clk,reset, segments, an, seg);
 	input clk;
+	input reset;
 	input [23:0] segments;
 	output [3:0] an;
 	output [7:0] seg;
@@ -29,40 +30,45 @@ module SegToSSD(clk, segments, an, seg);
 	reg [20:0] count = 0;
 	reg [3:0] ancount = 0;
 	
-	always @(posedge clk) begin
-		if (count == 2000000) begin
-			count = 1'b0;
-			if (ancount == 4)
-				ancount = 1'b0;
+	always @(posedge clk,posedge reset) begin
+		if(reset == 1'b1) begin
+			count <= 1'b0;
+			ancount <= 1'b0;
+		end
+		else if (count == 200000) begin
+			count <= 1'b0;
+			if (ancount == 3)
+				ancount <= 1'b0;
 			else
-				ancount = ancount + 1'b1;
+				ancount <= ancount + 1'b1;
 		end else begin
-			count = count + 1'b1;
+			count <= count + 1'b1;
 		end
 	end
 
-	always @(ancount) begin
+	always @(ancount, segments) begin
 		case (ancount)
 			0:
 				begin
-					an <= 4'b0001;
+					an <= 4'b1110;
 					seg <= segments[7:0];
 				end
 			1:
 				begin
-					an <= 4'b0010;
+					an <= 4'b1101;
 					seg <= segments[15:8];
 				end
 			2:
 				begin
-					an <= 4'b0100;
+					an <= 4'b1011;
 					seg <= segments[23:16];
 				end
 			default:
 				begin
-					an <= 4'b1000;
-					seg <= segments[31:24];
+					an <= 4'b0111;
+					seg <= 8'b11111111;
 				end
 		endcase
+		//an <= ~an;
 	end
 endmodule
