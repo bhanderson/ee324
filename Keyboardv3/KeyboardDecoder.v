@@ -44,7 +44,7 @@ module KeyboardDecoder(clk,ps2d, ps2c, reset, key, ready,debug);
 	assign ps2_falling = (~ps2c_ff1) & ps2c_ff2;
 	
 	assign key = temp[8:1];
-//	assign parity = temp[1];
+	assign parity = temp[10];
 	
 	always @(posedge clk, posedge reset) begin
 		if(reset==1'b1) begin
@@ -54,7 +54,7 @@ module KeyboardDecoder(clk,ps2d, ps2c, reset, key, ready,debug);
 		end
 		else begin
 			if(ps2_falling==1'b1) begin
-				temp[10:0] <= {ps2d , temp[10:1]};//{temp[8:0], ps2d};
+				temp[10:0] <= {ps2d , temp[10:1]};
 				debug <=debug+1;
 				if (count == 10)
 					count <= 4'd0;
@@ -63,15 +63,13 @@ module KeyboardDecoder(clk,ps2d, ps2c, reset, key, ready,debug);
 			end
 		end
 	end
-	
-//	assign parity = ( key[0] ^ key[1] ^ ...
-	
-//	always @(posedge ps2c) begin
-//		if (count == 11)
-//			if(!parity == ^key)
-//				ready <= 1'b1;
-//			else
-//				ready <= 1'b0;
-//	end
+
+	always @(posedge ps2c) begin
+		if (count == 10)
+			if(!parity == ^key)
+				ready <= 1'b1;
+			else
+				ready <= 1'b0;
+	end
 
 endmodule

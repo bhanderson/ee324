@@ -27,13 +27,15 @@ module Problem1_test;
 	// Inputs
 	reg clk;
 	reg [7:0] sw;
+	reg rst;
 
 	// Outputs
 	wire Led;
 
 	// Instantiate the Unit Under Test (UUT)
 	Problem1 uut (
-		.clk(clk), 
+		.clk(clk),
+			.rst(rst),
 		.sw(sw), 
 		.Led(Led)
 	);
@@ -42,6 +44,8 @@ module Problem1_test;
 		// Initialize Inputs
 		clk = 0;
 		sw = 0;
+		rst = 0;
+		
 
 		// Wait 100 ns for global reset to finish
 		#100;
@@ -49,7 +53,7 @@ module Problem1_test;
 		// Add stimulus here
 		forever begin
 			// 30 ms
-			#30000000 sw = sw+1;
+			#1 clk = ~clk;
 		end
 
 	end

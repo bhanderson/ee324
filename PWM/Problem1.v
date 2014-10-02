@@ -18,20 +18,59 @@
 // Additional Comments: 
 //
 //////////////////////////////////////////////////////////////////////////////////
-module Problem1(clk, sw, Led);
+module Problem1(clk, rst, sw, Led, JA);
 	input clk;
+	input rst;
 	input [7:0] sw;
-	output reg Led = 0;
+	output reg Led;
+	output JA;
 
-	reg [19:0] counter = 0;
-	parameter sd = 3_921;
+	reg [27:0] clkcount = 0;
+	reg [27:0] nclkcount = 100_000_000;
+	reg [2:0] seconds;
+	wire [4:0] outs;
+	parameter eights = 12_500_000;
+	
+	assign JA = Led;
+	
+	PWM a(.clk(clk), .rst(rst), .in(sw), .out(outs[0]), .en(sw[0]));
+	PWM b(.clk(clk), .rst(rst), .in(clkcount /eights), .out(outs[1]), .en(seconds < 1));
+	PWM c(.clk(clk), .rst(rst), .in(8'b11111111), .out(outs[2]), .en(seconds > 0 && seconds < 3));
+	PWM d(.clk(clk), .rst(rst), .in(nclkcount / eights), .out(outs[3]), .en(seconds > 2 && seconds < 4));
+	PWM e(.clk(clk), .rst(rst), .in(8'b0), .out(outs[4]), .en(seconds >= 4));
+	
+	always @(outs) begin
+		if (sw[0]) begin
+			Led <= outs[0];
+		end else begin
+			case (seconds)
+				0:
+					Led <= outs[1];
+				1:
+					Led <= outs[2];
+				2:
+					Led <= outs[2];
+				3:
+					Led <= outs[3];
+				default:
+					Led <= outs[4];
+			endcase
+		end
+	end
 
-	always @(posedge clk) begin
-		counter = counter + 1;
-		if (counter <= sw*sd)
-			Led <= 1;
-		else
-			Led <= 4'b0;
-		if (counter >= 1_000_000) counter = 0;
+	always @(posedge(clk)) begin
+		if (rst) begin
+			clkcount <= 0;
+			seconds <= 0;
+			nclkcount <= 100_000_000;
+		end else begin
+			clkcount <= clkcount + 1;
+			nclkcount <= nclkcount - -1;
+			if (clkcount == 100_000_000) begin
+				seconds <= seconds + 1;
+				clkcount <= 0;
+				nclkcount <= 100_000_000;
+			end
+		end
 	end
 endmodule
