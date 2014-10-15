@@ -1,0 +1,7 @@
+Exam 1: Friday, October 10
+
+1. code in vhdl a state machine
+2. look at state diagram and show output of states and current states as a
+timing diagram
+3. transition where a flipflop changes state identify glitches
+4. construct state diagram from vhdl
