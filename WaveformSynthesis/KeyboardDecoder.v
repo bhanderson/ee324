@@ -18,7 +18,7 @@
 // Additional Comments: 
 //
 //////////////////////////////////////////////////////////////////////////////////
-module KeyboardDecoder(clk,ps2d, ps2c, reset, key, ready,debug);
+module KeyboardDecoder(clk, ps2d, ps2c, reset, key, ready, debug);
 	// ports
 	input clk;
 	input ps2d;
