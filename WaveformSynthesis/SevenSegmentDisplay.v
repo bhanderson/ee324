@@ -17,19 +17,19 @@ module SevenSegmentDisplay(
 		if (rst)	count <= 0;
 		else		count <= count + 1;
 		
-		if (count < 125) begin
+		if (count < 255) begin
 			seg <= d3_seg;
 			an <= 4'b0111;
-		end else if (count < 250) begin
+		end else if (count < 511) begin
 			seg <= d2_seg;
 			an <= 4'b1011;
-		end else if (count < 375) begin
+		end else if (count < 767) begin
 			seg <= d1_seg;
 			an <= 4'b1101;
-		end else if (count < 500) begin
+		end else if (count < 1000) begin
 			seg <= d0_seg;
-			an <= 4'b1101;
-		end else if (count > 500) begin
+			an <= 4'b1110;
+		end else if (count > 1000) begin
 			count <= 0;
 		end
 		else begin

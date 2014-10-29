@@ -20,11 +20,11 @@
 //////////////////////////////////////////////////////////////////////////////////
 module Wavegen(
     input clk,
-    input [7:0] tonediv,
-    output reg [7:0] out
+    input [10:0] tonediv,
+    output reg [10:0] out
     );
-	 
-reg [7:0] count;
+
+reg [10:0] count;
 
 always @(posedge(clk)) begin
 	if ((count % tonediv) == 0) out <= out + 1;
