@@ -27,8 +27,12 @@ module Wavegen(
 reg [10:0] count;
 
 always @(posedge(clk)) begin
-	if ((count % tonediv) == 0) out <= out + 1;
-	count <= count + 1;
+	if ((count == tonediv)) begin
+		out <= out + 1;
+		count <= 0;
+	end
+	else
+		count <= count + 1;
 end
 
 endmodule
