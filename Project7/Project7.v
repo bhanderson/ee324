@@ -51,8 +51,11 @@ reg [2:0] p_state, n_state;
 	
 PmodMICRefComp mic(.CLK(CLK), .RST(RST), .SDATA(SDATA), .SCLK(SCLK), .NCS(NCS),
 					.DATA(idata), .START(start), .DONE(done));
+					
 BtnDebounce play(.clk(CLK), .btn(PLAY), .btn_out(PLAYBTN));
+
 BtnDebounce rec(.clk(CLK), .btn(REC), .btn_out(RECBTN));
+
 Sample_clk_div div(.clk(CLK), .rst(RST), .sample_clk(sample_clk));
 
 PWM p(.clk(CLK), .rst(RST), .en(1'b1), .val(odata), .o(ANOUT));
