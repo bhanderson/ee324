@@ -55,7 +55,7 @@
 // "Output    Output      Phase     Duty      Pk-to-Pk        Phase"
 // "Clock    Freq (MHz) (degrees) Cycle (%) Jitter (ps)  Error (ps)"
 //----------------------------------------------------------------------------
-// CLK_OUT1____10.000______0.000______50.0_____2200.000____150.000
+// CLK_OUT1____12.500______0.000______50.0_____1800.000____150.000
 //
 //----------------------------------------------------------------------------
 // "Input Clock   Freq (MHz)    Input Jitter (UI)"
@@ -69,7 +69,7 @@ module ClkDiv
  (// Clock in ports
   input         clk,
   // Clock out ports
-  output        clk_10mhz,
+  output        memclk,
   // Status and control signals
   input         RESET,
   output        LOCKED
@@ -96,8 +96,8 @@ module ClkDiv
   wire clkfx;
 
   DCM_SP
-  #(.CLKDV_DIVIDE          (10.000),
-    .CLKFX_DIVIDE          (20),
+  #(.CLKDV_DIVIDE          (8.000),
+    .CLKFX_DIVIDE          (16),
     .CLKFX_MULTIPLY        (2),
     .CLKIN_DIVIDE_BY_2     ("FALSE"),
     .CLKIN_PERIOD          (10.0),
@@ -142,7 +142,7 @@ module ClkDiv
     .I (clk0));
 
   BUFG clkout1_buf
-   (.O   (clk_10mhz),
+   (.O   (memclk),
     .I   (clkfx));
 
 

@@ -24,48 +24,81 @@ module Project7v2(
 	// mic
 	output sclk,
 	output ncs,
-	input sdata
+	input sdata,
+	// switches
+	input [7:0] sw
     );
 
 assign anen = 'b1, angain = 'b1;
 assign rst = btn[0], play = btn[1], rec = btn[2];
-assign Led[0] = play, Led[1] = rec, Led[2] = micData, Led[3] = memData;
+//assign Led[0] = play, Led[1] = rec, Led[2] = micData, Led[3] = pwmdata;
 wire [11:0] micData;
-
+wire micdone;
 MicCtrl MicCtrl (
     .clk(clk),
     .rst(rst),
     .sdata(sdata),
     .sclk(sclk),
     .ncs(ncs),
-    .data(micData)
+    .odata(micData),
+	.done(micdone),
+	.sample_clk(sample_clk)
     );
-	
-wire [11:0] pwmIn;
-wire [15:0] memData;
+wire [15:0] pwmdata;
+wire pwmdone;
+PWM p(.clk(clk), .rst(rst), .en(play), .val(pwmdata), .o(anout), .done(pwmdone));
 
-PWM p(.clk(clk), .rst(rst), .en(play), .val(memData[11:0]), .o(anout));
+//assign Led = (rec) ? micData : pwmdata;
 
-assign memData = (rec) ? micData : 'bZ;
 
-assign pwmIn = (play) ? memData : 0;
-MemoryCtrl MemCtrl (
-    .A(MemAdr), 
-    .CLK(MemClk), 
-    .ADV(MemAdv), 
-    .CRE(RamCRE), 
-    .CE(RamCS), 
-    .OE(MemOE), 
-    .WE(MemWR), 
-    .LB(RamLB), 
-    .UB(RamUB), 
-    .DQ(MemDB), 
-    .WAIT(MemWait), 
-    .sCLK(clk), 
-    .REC(rec), 
-    .PLAY(play),
-	.RST(rst),
-    .DATA(memData)
+reg [22:0] address;
+wire memdone, membusy;
+reg mclk;
+integer count;
+always @(posedge(clk)) begin
+	if(count < 10) begin
+		count <= count + 1;
+		mclk <= 0;
+	end
+	else begin
+		count <= 0;
+		mclk <= 1;
+	end
+end
+
+
+always @(posedge(memdone)) begin
+	if(rec || play)begin
+		address <= address + 1;
+	end
+	else
+		address <= 0;
+end
+
+assign Led = address;
+micron memory (
+    .clk(mclk), 
+    .reset(rst), 
+    .start(1'b1), 
+    .op(~play),
+    .addr(address), 
+    .datain(micData), 
+    .dataout(pwmdata), 
+    .done(memdone), 
+    .busy(membusy), 
+    .MemOE(MemOE), 
+    .MemWE(MemWR), 
+    .MemAdv(MemAdv), 
+    .MemClk(MemClk), 
+    .MemCE(RamCS), 
+    .MemCRE(RamCRE), 
+    .MemUB(RamUB), 
+    .MemLB(RamLB), 
+    .MemAddr(MemAdr), 
+    .MemData(MemDB), 
+    .FlashCS(FlashCS)
     );
+
+
 
 endmodule

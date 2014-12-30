@@ -12,16 +12,21 @@ module MemoryCtrl(
     output UB,
     inout [15:0] DQ,
     input WAIT,
-    input sCLK,
+//
+   input sCLK,
     input REC,
     input PLAY,
+	input memselect,
 	input RST,
-	inout [15:0] DATA
+	input ien,
+	input [15:0] idata,
+	input oen,
+	output reg [15:0] odata
     );
 integer count;
 reg slowCLK;
 always @(posedge(sCLK)) begin
-	if(count < 10)
+	if(count < 20)
 		count = count + 1;
 	else begin
 		count = 0;
@@ -30,25 +35,31 @@ always @(posedge(sCLK)) begin
 end
 
 reg [3:0] pS, nS;
-
 always @(posedge(slowCLK)) begin
 	pS <= nS;
 end
 
-assign CE = 1'b0, LB = 1'b0, UB = 1'b0, CRE = 1'b0, ADV = 1'b0, CLK = 1'b0;
-assign DQ = (WE) ? 'bZ : DATA;
-assign DATA = (OE) ? 'bZ : DQ;
-always @(REC or PLAY or RST) begin
-	A <= 0;
+assign LB = 1'b0, UB = 1'b0, CRE = 1'b0, ADV = 1'b0, CLK = 1'b0, CE = 1'b0;
+assign DQ = (WE) ? 'bZ : 8'b10101010;
+//assign odata = (OE) ? 'bZ : DQ;
+
+always @(pS) begin
 	nS <= 0;
-	OE <= 1'b1;
-	WE <= 1'b1;
+//	OE <= 1'b1;
+//	WE <= 1'b1;
 	case (pS)
 		0:
 		begin
-			if (REC) nS <= 1;
-			else if (PLAY) nS <= 3;
-			else nS <= 0;
+			if (REC && ien) begin
+				nS <= 1;
+			end
+			else if (PLAY && ien) begin
+				nS <= 4;
+			end
+			else begin
+				nS <= 0;
+				A <= 0;
+			end
 		end
 		1:
 		begin
@@ -58,21 +69,24 @@ always @(REC or PLAY or RST) begin
 		2:
 		begin
 			WE <= 1'b1;
-			if (A > 8000000) A <= 0;
-			else A <= A + 1;
-			nS <= 0;
+			nS <= 3;
 		end
 		3:
 		begin
-			OE <= 1'b0;
-			nS <= 4;
-		end
-		4:
-		begin
-			OE <= 1'b1;
 			if (A > 8000000) A <= 0;
 			else A <= A + 1;
 			nS <= 0;
+		end
+		4:
+		begin
+			OE <= 1'b0;
+			odata <= DQ;
+			nS <= 5;
+		end
+		5:
+		begin
+			OE <= 1'b1;
+			nS <= 3;
 		end
 		default:
 			nS <= 0;	

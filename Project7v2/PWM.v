@@ -4,7 +4,8 @@ module PWM(
 	 input rst,
 	 input en,
     input [11:0] val,
-    output reg o
+    output reg o,
+	output reg done
     );
 	 
 	reg [11:0] count = 0;
@@ -12,9 +13,13 @@ module PWM(
 		if (rst) count <= 0;
 		
 		count <= count + 1;
-		if (count > val && en)
+		if (count > val && en) begin
 			o <= 1'b1;
-		else
+			done <= 0;
+		end
+		else begin
 			o <= 1'b0;
+			done <= 1;
+		end
 	end
 endmodule

@@ -24,14 +24,16 @@ module MicCtrl(
 	input sdata,
 	output sclk,
 	output ncs,
-	output [11:0] data
+	output reg [11:0] odata,
+	output done,
+	output sample_clk
     );
 
 reg [3:0] present_state, next_state;
 
-wire sample_clk, done;
+//wire sample_clk;
 reg start;
-
+wire [11:0] data;
 PmodMICRefComp mic(.CLK(clk), .RST(rst), .SDATA(sdata), .SCLK(sclk),
 					.nCS(ncs), .DATA(data), .START(start), .DONE(done));
 
@@ -40,7 +42,7 @@ Sample_clk_div div(.clk(clk), .rst(rst), .sample_clk(sample_clk));
 always @(posedge(clk)) begin
 	present_state <= next_state;
 end
-always @(posedge(sample_clk)) begin
+always @(present_state) begin
 	case (present_state)
 		0:
 		begin
@@ -57,8 +59,10 @@ always @(posedge(sample_clk)) begin
 		2:
 		begin
 			start <= 1'b0;
-			if (done)
+			if (done)begin
+				odata <= data;
 				next_state <= 0;
+			end
 		end
 		default:
 		begin

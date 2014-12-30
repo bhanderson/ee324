@@ -98,7 +98,7 @@ module ClkDiv_exdes
    (// Clock in ports
     .clk            (CLK_IN1),
     // Clock out ports
-    .clk_10mhz           (clk_int),
+    .memclk           (clk_int),
     // Status and control signals
     .RESET              (RESET),
     .LOCKED             (LOCKED));
